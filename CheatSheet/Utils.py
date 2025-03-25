@@ -5,6 +5,7 @@ plot_loss_curves
 """
 import torch
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 def save_model(model:torch.nn.Module,
                targed_dir: str,
