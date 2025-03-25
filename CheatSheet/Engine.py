@@ -52,10 +52,10 @@ def train_step(
 
         # accuracy
         y_pred_class = torch.argmax(torch.softmax(y_pred, dim=1), dim=1)
-        train_acc += (y_pred_class == y).sum().item() / len(y_pred)
+        train_acc += (y_pred_class == y).sum().item() / len(y)
 
     train_loss = train_loss / len(dataloader)
-    trait_acc = train_acc / len(dataloader)
+    train_acc = train_acc / len(dataloader)
     return train_loss, train_acc
 
 
