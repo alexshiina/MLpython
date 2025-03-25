@@ -49,28 +49,25 @@ def pred_and_plot_image(
                 ),
             ]
         )
-
-    ### Predict on image ###
-
-    # Make sure the model is on the target device
+    # Setting model to the target device
     model.to(device)
 
-    # Turn on model evaluation mode and inference mode
+
     model.eval()
     with torch.inference_mode():
-        # Transform and add an extra dimension to image (model requires samples in [batch_size, color_channels, height, width])
+        # Transform and add an extra dimension to image (model requires batch dimension)
         transformed_image = image_transform(img).unsqueeze(dim=0)
 
-        # Make a prediction on image with an extra dimension and send it to the target device
+        # Make a prediction on image
         target_image_pred = model(transformed_image.to(device))
 
-    # Convert logits -> prediction probabilities (using torch.softmax() for multi-class classification)
+    # Convert logits to propabilities
     target_image_pred_probs = torch.softmax(target_image_pred, dim=1)
 
-    # Convert prediction probabilities -> prediction labels
+    # Convert probabilities to prediction labels
     target_image_pred_label = torch.argmax(target_image_pred_probs, dim=1)
 
-    # Plot image with predicted label and probability
+    # Plotting the image
     plt.figure()
     plt.imshow(img)
     plt.title(
