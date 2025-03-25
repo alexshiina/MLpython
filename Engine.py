@@ -55,7 +55,7 @@ def train_step(
         train_acc += (y_pred_class == y).sum().item() / len(y_pred)
 
     train_loss = train_loss / len(dataloader)
-    test_acc = test_acc / len(dataloader)
+    test_acc = train_acc / len(dataloader)
     return train_loss, train_acc
 
 
