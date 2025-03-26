@@ -171,3 +171,53 @@ def train(
     return results
 
 
+def debug_train_step(
+    model: torch.nn.Module,
+    dataloader:torch.utils.data.DataLoader,
+    loss_fn: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    device: torch.device):
+    """Version of train_step that shows stats for every batch.
+
+    Args:
+    model: PyTorch model to be trained.
+    dataloader: Dataloader for the model to be trained on
+    loss_fn: Pytorch loss function
+    optimizer: Pytorch optimizer
+    device: Target device
+
+    Returns:
+    A tuple of (train_loss,train_accuracy)
+    """
+    model.to(device)
+    model.train()
+    #setup train loss and acc
+    train_loss,train_acc = 0,0
+    i=0 #num of batches
+    #loop through batches
+
+    for batch,(X,y) in enumerate(dataloader):
+      #send to device
+      X,y = X.to(device), y.to(device)
+
+      #forward pass
+      y_pred = model(X)
+
+      #calculate loss
+      loss = loss_fn(y_pred, y)
+      train_loss+=loss.item()
+
+      #zero grad
+      optimizer.zero_grad()
+
+      #loss backward
+      loss.backward()
+
+      #optimizer step
+      optimizer.step()
+
+      #accuracy
+      y_pred_class = torch.argmax(torch.softmax(y_pred,dim=1),dim=1)
+      train_acc = (y_pred_class ==y).sum().item()/len(y_pred)
+      i+=1
+      print(f"Batch {i} |:Loss: {loss:.4f} | Acc: {train_acc:.4f}")
