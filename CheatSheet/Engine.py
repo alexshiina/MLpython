@@ -221,3 +221,85 @@ def debug_train_step(
       train_acc = (y_pred_class ==y).sum().item()/len(y_pred)
       i+=1
       print(f"Batch {i} |:Loss: {loss:.4f} | Acc: {train_acc:.4f}")
+
+#added scaler to train_step, had to use AI for debbuging (had minor bugs)
+def train_stepV2(
+        model: torch.nn.Module,
+        dataloader: torch.utils.data.DataLoader,
+        loss_fn: torch.nn.Module,
+        optimizer: torch.optim.Optimizer,
+        device: torch.device,
+        scaler: torch.cuda.amp.GradScaler  # NEW: Add scaler argument
+) -> Tuple[float, float]:
+    """Trains a PyTorch model for a single epoch with mixed precision"""
+    model.to(device)
+    model.train()
+    train_loss, train_acc = 0, 0
+
+    for batch, (X, y) in enumerate(dataloader):
+        X, y = X.to(device), y.to(device)
+        optimizer.zero_grad()
+
+        # Mixed precision forward pass
+        with torch.cuda.amp.autocast():
+            y_pred = model(X)
+            loss = loss_fn(y_pred, y)
+
+        # Scaled backward pass and optimizer step
+        scaler.scale(loss).backward()  # Instead of loss.backward()
+        scaler.step(optimizer)  # Instead of optimizer.step()
+        scaler.update()
+
+        train_loss += loss.item()
+        y_pred_class = torch.argmax(y_pred, dim=1)  # More efficient than softmax+argmax
+        train_acc += (y_pred_class == y).sum().item() / len(y)
+
+    return train_loss / len(dataloader), train_acc / len(dataloader)
+
+def trainV2(
+        model: torch.nn.Module,
+        train_dataloader: torch.utils.data.DataLoader,  # FIXED: Use train loader for training
+        test_dataloader: torch.utils.data.DataLoader,
+        optimizer: torch.optim.Optimizer,
+        loss_fn: torch.nn.Module,
+        epochs: int,
+        len_epoch: int,
+        device: torch.device
+) -> Dict[str, List]:
+    # Initialize GradScaler once at beginning of training
+    scaler = torch.cuda.amp.GradScaler()  # NEW
+
+    results = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
+
+    for epoch in tqdm(range(epochs)):
+        # Pass scaler to train_step
+        train_loss, train_acc = train_step(
+            model=model,
+            dataloader=train_dataloader,  # FIXED: Use train loader instead of test loader
+            loss_fn=loss_fn,
+            optimizer=optimizer,
+            device=device,
+            scaler=scaler  # NEW
+        )
+
+        test_loss, test_acc = test_step(
+            model=model,
+            dataloader=test_dataloader,
+            loss_fn=loss_fn,
+            device=device
+        )
+        if epoch % len_epoch == 0:
+            print(
+                f"Epoch: {epoch + 1} | "
+                f"train_loss: {train_loss:.4f} | "
+                f"train_acc: {train_acc:.4f} | "
+                f"test_loss: {test_loss:.4f} | "
+                f"test_acc: {test_acc:.4f}"
+            )
+        results["train_loss"].append(train_loss)
+        results["train_acc"].append(train_acc)
+        results["test_loss"].append(test_loss)
+        results["test_acc"].append(test_acc)
+
+
+    return results
