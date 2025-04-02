@@ -21,7 +21,7 @@ def save_model(model:torch.nn.Module,
   """
   #creating directory
   target_dir_path = Path(target_dir)
-  target_dir.mkdir(parents = True,
+  target_dir_path.mkdir(parents = True,
                    exist_ok = True)
 
   #creating model save path
