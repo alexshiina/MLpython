@@ -273,7 +273,7 @@ def trainV2(
 
     for epoch in tqdm(range(epochs)):
         # Pass scaler to train_step
-        train_loss, train_acc = train_step(
+        train_loss, train_acc = train_stepV2(
             model=model,
             dataloader=train_dataloader,  # FIXED: Use train loader instead of test loader
             loss_fn=loss_fn,
