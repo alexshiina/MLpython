@@ -13,6 +13,7 @@ A machine learning project for traffic sign classification using the German Traf
 - [Dataset](#dataset)
 - [Model Architecture](#model-architecture)
 - [Results](#results)
+- [Live demo](#live-demo)
 
 ## About
 This project implements a deep learning model for classifying traffic signs using the GTSRB dataset. The solution achieves state-of-the-art performance in recognizing 43 different classes of traffic signs under various real-world conditions.
@@ -65,7 +66,7 @@ My solution uses a transfer learning with Vit_b16 model, using different head to
 
 > **Note:** The validation metrics shown in graphs represent Phase 1 training only. Final epoch metrics (Phase 2) are reflected in the table above.
 
-### Live Demo
+## Live demo
 Experience the model in action through our interactive Gradio interface:  
 [![Gradio Demo](https://img.shields.io/badge/Gradio-Live_Demo-blue)](https://huggingface.co/spaces/alexshiina/GTSRB_demo)
 
